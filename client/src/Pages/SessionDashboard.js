@@ -76,7 +76,7 @@ export default function SessionDashboard() {
     <div className="flex h-screen bg-gray-100">
       {/* Sidebar */}
       <aside className="w-20 md:w-64 bg-white shadow-lg flex flex-col">
-        <div className="flex items-center justify-center h-16 bg-indigo-600 text-white text-xl font-bold">
+        <div className="flex items-center justify-center h-16 text-indigo-600 text-xl font-bold">
           Sessions
         </div>
         <nav className="flex-1">
