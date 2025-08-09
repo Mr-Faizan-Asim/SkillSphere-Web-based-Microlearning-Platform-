@@ -1,5 +1,6 @@
 import React from "react";
-import { CheckCircle, DollarSign, GraduationCap, Users } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { CheckCircle, GraduationCap, Users } from "lucide-react";
 
 const plans = [
   {
@@ -31,6 +32,8 @@ const plans = [
 ];
 
 const PricingPage = () => {
+  const navigate = useNavigate();
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-indigo-100 py-12 px-6">
       {/* Header */}
@@ -92,6 +95,7 @@ const PricingPage = () => {
 
               {/* Button */}
               <button
+                onClick={() => navigate("/register")}
                 className={`w-full py-3 rounded-lg font-medium shadow-md transition-all ${
                   plan.highlight
                     ? "bg-white text-indigo-600 hover:bg-gray-100"
