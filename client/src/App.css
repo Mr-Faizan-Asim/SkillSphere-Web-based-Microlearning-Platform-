@@ -1,0 +1,265 @@
+/* src/index.css */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom Base Styles */
+@layer base {
+  :root {
+    --primary: #1a365d;       /* UET Blue */
+    --primary-light: #2c5282;
+    --secondary: #ed8936;     /* UET Orange */
+    --secondary-light: #f6ad55;
+    --accent: #4299e1;
+    --light: #f7fafc;
+    --dark: #2d3748;
+    --success: #48bb78;
+    --warning: #ecc94b;
+    --danger: #f56565;
+  }
+
+  html {
+    @apply scroll-smooth;
+  }
+
+  body {
+    @apply font-sans text-gray-800 bg-gray-50 antialiased;
+    line-height: 1.6;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-bold text-gray-900 leading-tight;
+  }
+
+  h1 { @apply text-4xl md:text-5xl; }
+  h2 { @apply text-3xl md:text-4xl; }
+  h3 { @apply text-2xl md:text-3xl; }
+  h4 { @apply text-xl md:text-2xl; }
+  h5 { @apply text-lg md:text-xl; }
+
+  a {
+    @apply text-primary hover:text-primary-light transition-colors;
+  }
+
+  p {
+    @apply text-gray-600 mb-4;
+  }
+}
+
+/* Custom Components */
+@layer components {
+  .btn {
+    @apply inline-flex items-center justify-center px-6 py-3 rounded-lg font-medium transition-all duration-300;
+  }
+
+  .btn-primary {
+    @apply bg-gradient-to-r from-secondary to-secondary-light text-white hover:shadow-lg hover:-translate-y-0.5;
+  }
+
+  .btn-outline {
+    @apply border-2 border-primary text-primary hover:bg-primary hover:text-white;
+  }
+
+  .btn-secondary {
+    @apply bg-primary text-white hover:bg-primary-light hover:shadow-md;
+  }
+
+  .card {
+    @apply bg-white rounded-xl shadow-md overflow-hidden transition-all hover:shadow-lg;
+  }
+
+  .input-field {
+    @apply w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-secondary focus:border-transparent transition-all;
+  }
+
+  .section {
+    @apply py-20;
+  }
+
+  .section-title {
+    @apply text-3xl md:text-4xl font-bold text-center mb-4;
+  }
+
+  .section-subtitle {
+    @apply text-xl text-gray-600 text-center max-w-3xl mx-auto mb-12;
+  }
+
+  .navbar-link {
+    @apply font-medium transition-colors hover:text-secondary;
+  }
+
+  .navbar-link.active {
+    @apply text-secondary;
+  }
+
+  .testimonial-card {
+    @apply bg-white p-8 rounded-xl shadow-lg hover:shadow-xl transition-shadow;
+  }
+
+  .stat-card {
+    @apply bg-white bg-opacity-90 backdrop-blur-sm rounded-xl shadow-md p-6 text-center;
+  }
+}
+
+/* Custom Utilities */
+@layer utilities {
+  .text-shadow {
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  .text-shadow-md {
+    text-shadow: 0 4px 8px rgba(0, 0, 0, 0.12);
+  }
+
+  .text-shadow-lg {
+    text-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+  }
+
+  .text-shadow-none {
+    text-shadow: none;
+  }
+
+  .hero-gradient {
+    background: linear-gradient(135deg, rgba(26, 54, 93, 0.9) 0%, rgba(44, 82, 130, 0.85) 100%);
+  }
+
+  .bg-dotted {
+    background-image: radial-gradient(#cbd5e0 1px, transparent 1px);
+    background-size: 20px 20px;
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .animate-float {
+    animation: float 6s ease-in-out infinite;
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-12px); }
+  }
+}
+
+/* Custom Animations */
+.fade-in {
+  animation: fadeIn 0.5s ease-in;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.slide-up {
+  animation: slideUp 0.5s ease-out;
+}
+
+@keyframes slideUp {
+  from { 
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to { 
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Custom Overrides */
+.hero-bg {
+  background: linear-gradient(135deg, rgba(26, 54, 93, 0.9) 0%, rgba(44, 82, 130, 0.85) 100%), 
+              url('https://images.unsplash.com/photo-1562774053-701939374585?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+}
+
+/* Custom Form Styles */
+.form-group {
+  @apply mb-6;
+}
+
+.form-label {
+  @apply block text-gray-700 mb-2 font-medium;
+}
+
+.form-control {
+  @apply input-field;
+}
+
+.form-error {
+  @apply text-danger text-sm mt-1;
+}
+
+/* Alumni Profile Specific */
+.profile-avatar {
+  @apply w-32 h-32 rounded-full border-4 border-white shadow-lg mx-auto;
+}
+
+.profile-header {
+  @apply bg-primary text-white py-12;
+}
+
+/* Event Calendar Specific */
+.event-day {
+  @apply h-32 p-2 border border-gray-200 overflow-y-auto scrollbar-hide;
+}
+
+.event-day.today {
+  @apply bg-blue-50;
+}
+
+.event-day-header {
+  @apply font-semibold text-sm mb-1;
+}
+
+/* Chatbot Specific */
+.chatbot-message {
+  @apply bg-gray-100 rounded-lg p-3 max-w-xs;
+}
+
+.chatbot-message.user {
+  @apply bg-primary text-white ml-auto;
+}
+
+/* Admin Dashboard Specific */
+.dashboard-card {
+  @apply bg-white rounded-lg shadow p-6;
+}
+
+.dashboard-stat {
+  @apply text-3xl font-bold text-primary;
+}
+
+/* Responsive Tweaks */
+@media (max-width: 768px) {
+  .hero-content {
+    text-align: center;
+  }
+  
+  .section {
+    @apply py-16;
+  }
+}
+
+/* Print Styles */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  
+  body {
+    @apply bg-white text-black;
+  }
+  
+  .card {
+    @apply shadow-none border border-gray-300;
+  }
+}
