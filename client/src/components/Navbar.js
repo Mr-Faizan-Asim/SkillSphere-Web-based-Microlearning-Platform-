@@ -28,6 +28,12 @@ const Navbar = () => {
     const token = sessionStorage.getItem("token");
     console.log("User:", storedUser ? JSON.parse(storedUser) : null);
     console.log("Token:", token);
+     if (!user || !user.role) return;
+
+    const role = user.role.toLowerCase();
+    const dashboardPath = `/dashboard/${role}`;
+
+    navigate(dashboardPath);
   };
 
   return (
@@ -116,7 +122,18 @@ const Navbar = () => {
                     <div className="bg-indigo-500 text-white w-8 h-8 rounded-full flex items-center justify-center font-semibold">
                       {avatarInitial}
                     </div>
-                    <span className="text-gray-700 font-medium">{user.name}</span>
+                    <span
+  className="text-gray-700 font-medium cursor-pointer hover:underline"
+  onClick={handleUserClick}
+  role="link"
+  tabIndex={0}
+  onKeyDown={(e) => {
+    if (e.key === "Enter" || e.key === " ") handleUserClick();
+  }}
+>
+  {user.name}
+</span>
+
                   </div>
                   <button
                     onClick={handleLogout}

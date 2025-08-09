@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
 const SignInPage = () => {
-  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
 
@@ -11,18 +11,27 @@ const SignInPage = () => {
     e.preventDefault();
     try {
       const res = await axios.post("http://localhost:4000/auth/login", {
-        name,
+        email,
         password,
       });
 
-      const { token, role, name: userName } = res.data;
+      const { token, user } = res.data;
 
+      // Store token & user in both storages
+      sessionStorage.setItem("token", token);
+      sessionStorage.setItem("user", JSON.stringify(user));
       localStorage.setItem("token", token);
-      localStorage.setItem("user", JSON.stringify({ name: userName, role }));
+      localStorage.setItem("user", JSON.stringify(user));
 
-      if (role === "admin") navigate("/dashboard/admin");
-      else if (role === "mentor") navigate("/dashboard/mentor");
-      else navigate("/dashboard/user");
+      // Force reload to update app state
+      if (user.role === "admin") {
+        window.location.href = "/dashboard/admin";
+      } else if (user.role === "mentor") {
+        window.location.href = "/dashboard/mentor";
+      } else {
+        window.location.href = "/dashboard/learner";
+      }
+
     } catch (err) {
       alert(err.response?.data?.error || "Login failed");
     }
@@ -40,23 +49,21 @@ const SignInPage = () => {
             SS
           </div>
           <h2 className="text-3xl font-bold mt-4 text-gray-800">Welcome Back</h2>
-          <p className="text-gray-500 text-sm mt-1">
-            Sign in to your account
-          </p>
+          <p className="text-gray-500 text-sm mt-1">Sign in to your account</p>
         </div>
 
-        {/* Name input */}
-        <label className="block mb-1 text-gray-700 font-medium">Name</label>
+        {/* Email */}
+        <label className="block mb-1 text-gray-700 font-medium">Email</label>
         <input
-          type="text"
-          placeholder="Enter your name"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
+          type="email"
+          placeholder="Enter your email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
           className="w-full border border-gray-300 rounded-lg px-4 py-2 mb-4 focus:ring-2 focus:ring-indigo-400 focus:outline-none"
           required
         />
 
-        {/* Password input */}
+        {/* Password */}
         <label className="block mb-1 text-gray-700 font-medium">Password</label>
         <input
           type="password"
@@ -67,7 +74,7 @@ const SignInPage = () => {
           required
         />
 
-        {/* Submit Button */}
+        {/* Submit */}
         <button
           type="submit"
           className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white py-2 rounded-lg text-lg font-medium shadow-md hover:from-indigo-700 hover:to-purple-700 transition-all"

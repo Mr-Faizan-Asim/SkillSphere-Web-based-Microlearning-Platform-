@@ -4,7 +4,8 @@ import { Navigate } from "react-router-dom";
 
 const ProtectedRoute = ({ allowedRole, children }) => {
   const token = localStorage.getItem("token");
-  const userRole = localStorage.getItem("role");
+  const user = JSON.parse(sessionStorage.getItem("user"));
+  const userRole = user?.role;
 
   if (!token) {
     // Not logged in → go to login

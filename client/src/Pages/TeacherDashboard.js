@@ -1,36 +1,29 @@
 import React, { useState } from "react";
-import MentorDashboard from "./MentorDashboard";
-import SessionDashboard from "./SessionDashboard";
+import MentorSessionRequests from "./MentorSessionRequests";
+
 
 const sidebarItems = [
-  { id: "mentors", label: "Mentors" },
   { id: "sessions", label: "Sessions" },
-  { id: "analysis", label: "Analysis" },
+  { id: "ratings", label: "Previous Ratings" },
+  { id: "profile", label: "Profile Update" },
 ];
 
-export default function LearnerDashboard() {
-  const [activeTab, setActiveTab] = useState("mentors");
+export default function TeacherDashboard() {
+  const [activeTab, setActiveTab] = useState("sessions");
   const [sidebarHovered, setSidebarHovered] = useState(false);
 
-  // Sidebar styles change on hover to expand/collapse
+  // Sidebar expand/collapse width
   const sidebarWidth = sidebarHovered ? "w-48" : "w-16";
 
-  // Content based on active tab
+  // Render content based on active tab
   const renderContent = () => {
     switch (activeTab) {
-      case "mentors":
-        return <MentorDashboard />;
       case "sessions":
-        return (
-          <SessionDashboard/>
-        );
-      case "analysis":
-        return (
-          <div className="p-6">
-            <h2 className="text-2xl font-bold">Analysis</h2>
-            <p>Analysis content coming soon...</p>
-          </div>
-        );
+        return <MentorSessionRequests/>
+      case "ratings":
+        return <>ABCS</>
+      case "profile":
+        return <>ABCS</>
       default:
         return null;
     }
@@ -56,7 +49,7 @@ export default function LearnerDashboard() {
                     : "text-gray-700 hover:bg-blue-200"
                 }`}
             >
-              {/* Icon placeholders */}
+              {/* Icon placeholder */}
               <span className="text-lg font-bold">
                 {item.label.charAt(0)}
               </span>

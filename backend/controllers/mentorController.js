@@ -1,24 +1,87 @@
-// controllers/mentorController.js
 const User = require('../models/user');
 
-exports.search = async (req, res) => {
-  const { q, subjects, tags, minRating=0, page=1, limit=10 } = req.query;
-  const filter = { role: 'mentor', 'mentorProfile.verified': true };
+// Get all mentors with pagination, filtering by goal or other params
+exports.getAllMentors = async (req, res) => {
+  try {
+    const { page = 1, limit = 10, goal, minRating = 0 } = req.query;
+    const filter = { role: 'mentor'};
 
-  if(subjects) filter['mentorProfile.subjects'] = { $in: subjects.split(',') };
-  if(tags) filter['mentorProfile.tags'] = { $in: tags.split(',') };
+    if (goal) {
+      filter.goals = { $in: [goal] }; // Search mentors by goal field
+    }
 
-  let mongoQuery = User.find(filter);
+    const skip = (page - 1) * limit;
 
-  if(q) {
-    mongoQuery = mongoQuery.find({ $text: { $search: q } }, { score: { $meta: 'textScore' } }).sort({ score: { $meta: 'textScore' } });
+    let mentors = await User.find(filter)
+      .skip(skip)
+      .limit(Number(limit))
+      .lean();
+
+    mentors = mentors.filter(m => (m.mentorProfile?.rating ?? 0) >= Number(minRating));
+
+    res.json({ data: mentors, page: Number(page) });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
+};
 
-  // minRating check handled after retrieving or with $expr in aggregation
-  const skip = (page-1)*limit;
-  const mentors = await mongoQuery.skip(skip).limit(Number(limit)).lean();
+// Get mentor by ID
+exports.getMentorById = async (req, res) => {
+  try {
+    const mentor = await User.findOne({ _id: req.params.id, role: 'mentor' }).lean();
+    if (!mentor) return res.status(404).json({ error: 'Mentor not found' });
+    res.json(mentor);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
 
-  // filter by rating client-side (or do aggregation for exact)
-  const result = mentors.filter(m => (m.mentorProfile?.rating ?? 0) >= Number(minRating));
-  res.json({ data: result, page:Number(page) });
+// Create or update mentor profile for logged-in mentor
+exports.createOrUpdateMentorProfile = async (req, res) => {
+  try {
+    const { subjects, tags, bio, portfolio, hourlyRate, languages, timezone, certifications } = req.body;
+    req.user.mentorProfile = {
+      bio,
+      subjects,
+      tags,
+      portfolio,
+      hourlyRate,
+      languages,
+      timezone,
+      certifications,
+      verified: false, // Needs admin approval
+    };
+    await req.user.save();
+    res.json({ message: 'Mentor profile submitted/updated for approval' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+// Delete mentor profile (optional: only admin or mentor self)
+exports.deleteMentorProfile = async (req, res) => {
+  try {
+    req.user.mentorProfile = null;
+    await req.user.save();
+    res.json({ message: 'Mentor profile deleted' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+// Get best rated mentor(s)
+exports.getBestRatedMentors = async (req, res) => {
+  try {
+    const mentors = await User.find({ role: 'mentor', 'mentorProfile.verified': true })
+      .sort({ 'mentorProfile.rating': -1 })
+      .limit(5)
+      .lean();
+
+    if (mentors.length === 0) {
+      return res.json({ data: [], message: 'No mentors are rated yet' });
+    }
+    res.json({ data: mentors });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 };
