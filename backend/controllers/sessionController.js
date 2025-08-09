@@ -3,8 +3,8 @@ const Session = require('../models/session');
 const User = require('../models/user');
 
 exports.book = async (req, res) => {
-  const { mentorId, scheduledAt, durationMinutes=30, channel='video' } = req.body;
-  const learnerId = req.user._id;
+  const { mentorId, learnerId: bodyLearnerId, scheduledAt, durationMinutes=30, channel='video' } = req.body;
+  const learnerId = bodyLearnerId;
 
   // basic checks
   const mentor = await User.findById(mentorId);

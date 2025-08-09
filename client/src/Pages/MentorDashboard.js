@@ -1,5 +1,8 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { RadialBarChart, RadialBar, Legend, Tooltip, ResponsiveContainer } from "recharts";
+import SessionBookingForm from "./SessionBookingForm"; 
+
 
 const sidebarItems = [
   { id: "mentor-list", label: "Mentor List" },
@@ -117,44 +120,107 @@ export default function MentorDashboard() {
   );
 
   // Mentor details UI (shown when mentor clicked)
-  const MentorDetailsTab = () => {
+    const MentorDetailsTab = () => {
     if (!selectedMentor) return <p>Loading mentor details...</p>;
 
     const m = selectedMentor;
+
+    // Prepare subject data for chart
+    const subjectData = (m.mentorProfile?.subjects || []).map((sub, idx) => ({
+        name: sub,
+        value: Math.floor(Math.random() * 100) + 50, // Simulated skill percentage
+        fill: `hsl(${idx * 60}, 70%, 50%)`,
+    }));
+
     return (
-      <div className="p-6 overflow-auto max-h-[80vh]">
+        <div className="p-6 overflow-auto max-h-[85vh] bg-gray-50 rounded-lg shadow-lg">
         <button
-          className="mb-4 px-3 py-1 bg-gray-300 rounded hover:bg-gray-400"
-          onClick={() => setActiveTab("mentor-list")}
+            className="mb-4 px-3 py-1 bg-gray-200 rounded hover:bg-gray-300 transition"
+            onClick={() => setActiveTab("mentor-list")}
         >
-          ← Back to List
+            ← Back to List
         </button>
-        <h2 className="text-3xl font-bold mb-4">{m.name || m.email}</h2>
-        <p><strong>Bio:</strong> {m.mentorProfile?.bio || "No bio"}</p>
-        <p><strong>Subjects:</strong> {m.mentorProfile?.subjects?.join(", ") || "N/A"}</p>
-        <p><strong>Tags:</strong> {m.mentorProfile?.tags?.join(", ") || "N/A"}</p>
-        <p><strong>Portfolio:</strong></p>
-        <ul className="list-disc list-inside mb-4">
-          {m.mentorProfile?.portfolio?.length ? (
-            m.mentorProfile.portfolio.map((item, i) => (
-              <li key={i}>
-                <a href={item.url} target="_blank" rel="noreferrer" className="text-blue-600 underline">
-                  {item.title}
-                </a>
-              </li>
-            ))
-          ) : (
-            <li>No portfolio items</li>
-          )}
-        </ul>
-        <p><strong>Rating:</strong> {m.mentorProfile?.rating || "No ratings"}</p>
-        <p><strong>Hourly Rate:</strong> {m.mentorProfile?.hourlyRate || "N/A"}</p>
-        <p><strong>Languages:</strong> {m.mentorProfile?.languages?.join(", ") || "N/A"}</p>
-        <p><strong>Timezone:</strong> {m.mentorProfile?.timezone || "N/A"}</p>
-        <p><strong>Certifications:</strong> {m.mentorProfile?.certifications?.join(", ") || "N/A"}</p>
-      </div>
+
+        {/* Header */}
+        <div className="flex items-center gap-4 mb-6">
+            <img
+            src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${m.name || m.email}`}
+            alt="Mentor avatar"
+            className="w-20 h-20 rounded-full border"
+            />
+            <div>
+            <h2 className="text-3xl font-bold">{m.name || m.email}</h2>
+            <p className="text-gray-600">{m.mentorProfile?.bio || "No bio provided"}</p>
+            </div>
+        </div>
+
+        {/* Info Grid */}
+        <div className="grid md:grid-cols-2 gap-6">
+            <div className="bg-white rounded-lg shadow p-4">
+            <h3 className="text-lg font-semibold mb-2">Details</h3>
+            <p><strong>Rating:</strong> ⭐ {m.mentorProfile?.rating || "No ratings"}</p>
+            <p><strong>Hourly Rate:</strong> {m.mentorProfile?.hourlyRate || "N/A"}</p>
+            <p><strong>Languages:</strong> {m.mentorProfile?.languages?.join(", ") || "N/A"}</p>
+            <p><strong>Timezone:</strong> {m.mentorProfile?.timezone || "N/A"}</p>
+            <p><strong>Certifications:</strong> {m.mentorProfile?.certifications?.join(", ") || "N/A"}</p>
+            </div>
+
+            <div className="bg-white rounded-lg shadow p-4">
+            <h3 className="text-lg font-semibold mb-4">Subject Proficiency</h3>
+            {subjectData.length > 0 ? (
+                <ResponsiveContainer width="100%" height={250}>
+                <RadialBarChart
+                    cx="50%"
+                    cy="50%"
+                    innerRadius="20%"
+                    outerRadius="90%"
+                    barSize={15}
+                    data={subjectData}
+                >
+                    <RadialBar minAngle={15} label={{ position: "insideStart", fill: "#fff" }} background clockWise dataKey="value" />
+                    <Legend iconSize={10} layout="horizontal" verticalAlign="bottom" align="center" />
+                    <Tooltip />
+                </RadialBarChart>
+                </ResponsiveContainer>
+            ) : (
+                <p>No subjects available</p>
+            )}
+            </div>
+        </div>
+
+        {/* Portfolio */}
+        <div className="bg-white rounded-lg shadow p-4 mt-6">
+            <h3 className="text-lg font-semibold mb-2">Portfolio</h3>
+            <ul className="list-disc list-inside space-y-1">
+            {m.mentorProfile?.portfolio?.length ? (
+                m.mentorProfile.portfolio.map((item, i) => (
+                <li key={i}>
+                    <a
+                    href={item.url}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-blue-600 hover:underline"
+                    >
+                    {item.title}
+                    </a>
+                </li>
+                ))
+            ) : (
+                <li>No portfolio items</li>
+            )}
+            </ul>
+        </div>
+
+        {/* Action */}
+        <button
+            className="mt-6 px-5 py-2 bg-green-500 text-white rounded-lg shadow hover:bg-green-600 transition"
+            onClick={() => setActiveTab("session-form")}
+        >
+            Schedule a Session
+        </button>
+        </div>
     );
-  };
+    };
 
   // Mentor profile form (reuse your MentorProfileForm or inline simple form here)
   const MentorProfileTab = () => (
@@ -176,6 +242,8 @@ export default function MentorDashboard() {
         return <MentorDetailsTab />;
       case "profile":
         return <MentorProfileTab />;
+      case "session-form":
+        return <SessionBookingForm mentor={selectedMentor} onBack={() => setActiveTab("mentor-details")} />;
       default:
         return <MentorListTab />;
     }

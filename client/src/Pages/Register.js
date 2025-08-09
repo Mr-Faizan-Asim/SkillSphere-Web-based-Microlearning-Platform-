@@ -45,6 +45,7 @@ const Register = () => {
     // Store user in sessionStorage
     sessionStorage.setItem("user", JSON.stringify(data.user));
 
+    console.log("Registration successful:", data.user);
     navigate("/dashboard"); // Redirect after signup
   } catch (err) {
     setError(err.message);
