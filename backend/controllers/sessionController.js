@@ -106,3 +106,55 @@ exports.getMentorSessions = async (req, res) => {
     res.status(500).json({ error: 'Error fetching mentor sessions' });
   }
 };
+
+
+exports.acceptSession = async (req, res) => {
+  try {
+    const sessionId = req.params.id;
+
+    const session = await Session.findById(sessionId);
+    if (!session) {
+      return res.status(404).json({ error: 'Session not found' });
+    }
+
+    // Only allow if current status is 'requested'
+    if (session.status !== 'requested') {
+      return res.status(400).json({ error: 'Session cannot be accepted in its current status' });
+    }
+
+    session.status = 'confirmed';
+    await session.save();
+
+    res.json({ message: 'Session accepted', session });
+  } catch (error) {
+    console.error('Error accepting session:', error);
+    res.status(500).json({ error: 'Server error while accepting session' });
+  }
+};
+
+// ======================
+// Decline session request (mentor)
+// ======================
+exports.declineSession = async (req, res) => {
+  try {
+    const sessionId = req.params.id;
+
+    const session = await Session.findById(sessionId);
+    if (!session) {
+      return res.status(404).json({ error: 'Session not found' });
+    }
+
+    // Only allow if current status is 'requested'
+    if (session.status !== 'requested') {
+      return res.status(400).json({ error: 'Session cannot be declined in its current status' });
+    }
+
+    session.status = 'rejected';
+    await session.save();
+
+    res.json({ message: 'Session declined', session });
+  } catch (error) {
+    console.error('Error declining session:', error);
+    res.status(500).json({ error: 'Server error while declining session' });
+  }
+};

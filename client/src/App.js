@@ -10,6 +10,7 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import LearnerDashboard from "./Pages/LearnerDashboard";
 import FeaturesPage from "./Pages/FeaturesPage";
 import PricingPage from "./Pages/PricingPage";
+import TeacherDashboard from "./Pages/TeacherDashboard";
 
 // Dummy dashboard components
 const AdminDashboard = () => <h1>Admin Dashboard</h1>;
@@ -42,7 +43,7 @@ function App() {
               path="/dashboard/mentor"
               element={
                 <ProtectedRoute allowedRole="mentor">
-                  <MentorDashboard />
+                  <TeacherDashboard />
                 </ProtectedRoute>
               }
             />

@@ -15,9 +15,8 @@ router.get('/learner/:learnerId', sessionController.getLearnerSessions);
 // Get sessions for a specific mentor
 router.get('/mentor/:mentorId', sessionController.getMentorSessions);
 
-// Accept session request (mentor)
-router.patch('/:id/accept', async (req, res) => {
-  res.json({ message: 'Session accepted' });
-});
+
+router.patch('/:id/accept', sessionController.acceptSession);
+router.patch('/:id/decline', sessionController.declineSession);
 
 module.exports = router;

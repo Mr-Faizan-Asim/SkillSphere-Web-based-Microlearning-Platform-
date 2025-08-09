@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import axios from "axios";
-import { Calendar, Clock, Video, Mic, MessageSquare, Link as LinkIcon } from "lucide-react";
+import { Calendar, Clock, Video, Mic, MessageSquare, Link as LinkIcon, Plus, Trash } from "lucide-react";
 
 export default function SessionBookingForm({ mentor, onBack }) {
   const [scheduledAt, setScheduledAt] = useState("");
@@ -8,26 +8,38 @@ export default function SessionBookingForm({ mentor, onBack }) {
   const [customDuration, setCustomDuration] = useState("");
   const [channel, setChannel] = useState("video");
   const [price, setPrice] = useState("");
-  const [notes, setNotes] = useState("");
+  const [resources, setResources] = useState([{ title: "", url: "" }]);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
 
   const minDateTime = new Date().toISOString().slice(0, 16);
   const presetDurations = [15, 20, 30, 45, 60];
 
+  const handleResourceChange = (index, field, value) => {
+    const updated = [...resources];
+    updated[index][field] = value;
+    setResources(updated);
+  };
+
+  const addResource = () => {
+    setResources([...resources, { title: "", url: "" }]);
+  };
+
+  const removeResource = (index) => {
+    setResources(resources.filter((_, i) => i !== index));
+  };
+
   async function handleSubmit(e) {
     e.preventDefault();
     setLoading(true);
     setMessage("");
 
-    // Read token & user from localStorage
     const storedToken = localStorage.getItem("token");
     const storedUser = sessionStorage.getItem("user");
     let learnerId = null;
-    console.log("Stored User:", JSON.parse(storedUser));
-    console.log("Stored Token:", storedToken);
+
     try {
-      learnerId = storedUser ? JSON.parse(storedUser)?.id : null; // "id" not "_id" in your object
+      learnerId = storedUser ? JSON.parse(storedUser)?.id : null;
     } catch {
       learnerId = null;
     }
@@ -38,21 +50,27 @@ export default function SessionBookingForm({ mentor, onBack }) {
       return;
     }
 
+    if (resources.length === 0 || resources.some(r => !r.title.trim() || !r.url.trim())) {
+      setMessage("❌ Please provide a title and URL for at least one resource.");
+      setLoading(false);
+      return;
+    }
+
     try {
       await axios.post(
         "http://localhost:4000/sessions",
         {
           mentorId: mentor._id,
-          learnerId, // Include learner ID
+          learnerId,
           scheduledAt,
           durationMinutes: customDuration ? Number(customDuration) : durationMinutes,
           channel,
           price: price ? Number(price) : undefined,
-          notes,
+          resources
         },
         {
           headers: {
-            Authorization: `Bearer ${storedToken}`, // Send JWT
+            Authorization: `Bearer ${storedToken}`,
           },
           withCredentials: true,
         }
@@ -67,7 +85,6 @@ export default function SessionBookingForm({ mentor, onBack }) {
 
   return (
     <div className="p-6 max-w-4xl mx-auto bg-white shadow-xl rounded-xl">
-      {/* Back Button */}
       <button
         onClick={onBack}
         className="mb-6 px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300"
@@ -191,16 +208,45 @@ export default function SessionBookingForm({ mentor, onBack }) {
             </div>
           </div>
 
-          {/* Notes */}
+          {/* Resources */}
           <div>
-            <label className="block font-semibold mb-2">Notes / Description</label>
-            <textarea
-              rows="4"
-              className="border rounded-lg w-full px-4 py-2"
-              placeholder="Add any specific topics, goals, or resources you’d like to cover..."
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-            />
+            <label className="block font-semibold mb-2">Resources</label>
+            {resources.map((res, index) => (
+              <div key={index} className="flex gap-2 mb-2">
+                <input
+                  type="text"
+                  placeholder="Title"
+                  className="border rounded-lg px-3 py-2 flex-1"
+                  value={res.title}
+                  onChange={(e) => handleResourceChange(index, "title", e.target.value)}
+                  required
+                />
+                <input
+                  type="url"
+                  placeholder="URL"
+                  className="border rounded-lg px-3 py-2 flex-1"
+                  value={res.url}
+                  onChange={(e) => handleResourceChange(index, "url", e.target.value)}
+                  required
+                />
+                {resources.length > 1 && (
+                  <button
+                    type="button"
+                    onClick={() => removeResource(index)}
+                    className="bg-red-500 text-white px-3 rounded-lg hover:bg-red-600"
+                  >
+                    <Trash size={16} />
+                  </button>
+                )}
+              </div>
+            ))}
+            <button
+              type="button"
+              onClick={addResource}
+              className="flex items-center gap-2 mt-2 text-blue-600 hover:underline"
+            >
+              <Plus size={16} /> Add Resource
+            </button>
           </div>
 
           {/* Submit Button */}
