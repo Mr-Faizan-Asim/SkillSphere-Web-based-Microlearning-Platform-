@@ -27,6 +27,7 @@ app.use('/auth', authRouter);
 app.use('/mentors', mentorRouter);
 app.use('/sessions', sessionRouter);
 app.use('/admin', adminRouter);
+app.use('/learners', require('./routes/learnerRoutes'));
 
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, ()=> console.log(`Listening ${PORT}`));
