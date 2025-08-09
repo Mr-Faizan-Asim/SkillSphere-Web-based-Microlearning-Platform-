@@ -8,6 +8,8 @@ import Register from "./Pages/Register";
 import SignInPage from "./Pages/SignInPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import LearnerDashboard from "./Pages/LearnerDashboard";
+import FeaturesPage from "./Pages/FeaturesPage";
+import PricingPage from "./Pages/PricingPage";
 
 // Dummy dashboard components
 const AdminDashboard = () => <h1>Admin Dashboard</h1>;
@@ -24,6 +26,8 @@ function App() {
             <Route path="/register" element={<Register />} />
             <Route path="/how-it-works" element={<HowItWorks />} />
             <Route path="/signin" element={<SignInPage />} />
+            <Route path="/features" element={<FeaturesPage />} />
+            <Route path="/pricing" element={<PricingPage />} /> 
 
             {/* Protected routes */}
             <Route
