@@ -11,7 +11,7 @@ app.use(cors());
 app.use(express.json());
 app.use(rateLimit({ windowMs: 60*1000, max: 100 }));
 
-mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/mentorship', {
+mongoose.connect('mongodb+srv://faizan:faizan246@cluster0.5klp2pw.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0', {
   useNewUrlParser:true, useUnifiedTopology:true
 }).then(()=> console.log('DB connected'));
 
