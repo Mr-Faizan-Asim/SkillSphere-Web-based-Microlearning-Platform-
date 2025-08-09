@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import MentorDashboard from "./MentorDashboard";
+import SessionDashboard from "./SessionDashboard";
 
 const sidebarItems = [
   { id: "mentors", label: "Mentors" },
@@ -21,10 +22,7 @@ export default function LearnerDashboard() {
         return <MentorDashboard />;
       case "sessions":
         return (
-          <div className="p-6">
-            <h2 className="text-2xl font-bold">Sessions</h2>
-            <p>Sessions content coming soon...</p>
-          </div>
+          <SessionDashboard/>
         );
       case "analysis":
         return (
