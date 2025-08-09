@@ -43,11 +43,9 @@ function App() {
               }
             />
             <Route
-              path="/dashboard/user"
+              path="/dashboard/learner"
               element={
-              
                   <LearnerDashboard />
-               
               }
             />
           </Routes>

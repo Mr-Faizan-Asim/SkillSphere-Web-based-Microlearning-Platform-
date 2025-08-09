@@ -1,176 +1,76 @@
-import React, { useEffect, useState } from "react";
-import axios from "axios";
+import React, { useState } from "react";
+import MentorDashboard from "./MentorDashboard";
 
 const sidebarItems = [
   { id: "mentors", label: "Mentors" },
   { id: "sessions", label: "Sessions" },
-  { id: "previous", label: "Previous Details" },
-  { id: "create-session", label: "Create Session" },
+  { id: "analysis", label: "Analysis" },
 ];
 
 export default function LearnerDashboard() {
   const [activeTab, setActiveTab] = useState("mentors");
-  const [mentors, setMentors] = useState([]);
-  const [filters, setFilters] = useState({ skill: "", rating: "" });
-  const [filteredMentors, setFilteredMentors] = useState([]);
+  const [sidebarHovered, setSidebarHovered] = useState(false);
 
-  // Fetch all mentors on load
-  useEffect(() => {
-    async function fetchMentors() {
-      try {
-        const res = await axios.get("http://localhost:4000/mentors");
-        setMentors(res.data);
-        setFilteredMentors(res.data);
-      } catch (error) {
-        console.error("Failed to fetch mentors:", error);
-      }
-    }
-    fetchMentors();
-  }, []);
+  // Sidebar styles change on hover to expand/collapse
+  const sidebarWidth = sidebarHovered ? "w-48" : "w-16";
 
-  // Filter mentors when filters change
-  useEffect(() => {
-    let filtered = [...mentors];
-
-    if (filters.skill) {
-      filtered = filtered.filter((mentor) =>
-        mentor.subjects?.some((sub) =>
-          sub.toLowerCase().includes(filters.skill.toLowerCase())
-        )
-      );
-    }
-
-    if (filters.rating) {
-      filtered = filtered.filter(
-        (mentor) => mentor.rating >= parseFloat(filters.rating)
-      );
-    }
-
-    setFilteredMentors(filtered);
-  }, [filters, mentors]);
-
-  // Handle filter changes
-  function handleFilterChange(e) {
-    const { name, value } = e.target;
-    setFilters((prev) => ({ ...prev, [name]: value }));
-  }
-
-  // UI for sidebar navigation
-  const Sidebar = () => (
-    <nav className="w-64 bg-gray-100 min-h-screen p-4">
-      <h2 className="text-xl font-bold mb-6">Learner Dashboard</h2>
-      <ul>
-        {sidebarItems.map((item) => (
-          <li
-            key={item.id}
-            onClick={() => setActiveTab(item.id)}
-            className={`cursor-pointer p-2 mb-2 rounded ${
-              activeTab === item.id ? "bg-blue-500 text-white" : "hover:bg-blue-100"
-            }`}
-          >
-            {item.label}
-          </li>
-        ))}
-      </ul>
-    </nav>
-  );
-
-  // UI for mentors tab with filters and list
-  const MentorsTab = () => (
-    <div className="p-6">
-      <h3 className="text-2xl font-semibold mb-4">Available Mentors</h3>
-
-      {/* Filters */}
-      <div className="flex gap-4 mb-6">
-        <input
-          type="text"
-          placeholder="Filter by skill"
-          name="skill"
-          value={filters.skill}
-          onChange={handleFilterChange}
-          className="border p-2 rounded w-48"
-        />
-        <select
-          name="rating"
-          value={filters.rating}
-          onChange={handleFilterChange}
-          className="border p-2 rounded w-32"
-        >
-          <option value="">Filter by rating</option>
-          <option value="4">4+ stars</option>
-          <option value="3">3+ stars</option>
-          <option value="2">2+ stars</option>
-          <option value="1">1+ star</option>
-        </select>
-      </div>
-
-      {/* Mentors List */}
-      {filteredMentors.length === 0 ? (
-        <p>No mentors found.</p>
-      ) : (
-        <ul className="space-y-4">
-          {filteredMentors.map((mentor) => (
-            <li
-              key={mentor._id}
-              className="border rounded p-4 hover:shadow-lg transition cursor-pointer"
-              onClick={() => alert(`You clicked mentor: ${mentor.name || mentor.email}`)}
-            >
-              <h4 className="text-xl font-semibold">{mentor.name || mentor.email}</h4>
-              <p>
-                <strong>Subjects:</strong>{" "}
-                {mentor.subjects ? mentor.subjects.join(", ") : "N/A"}
-              </p>
-              <p>
-                <strong>Rating:</strong> {mentor.rating || "No ratings"}
-              </p>
-              <p>{mentor.bio || "No bio provided"}</p>
-            </li>
-          ))}
-        </ul>
-      )}
-    </div>
-  );
-
-  // Placeholder components for other tabs
-  const SessionsTab = () => (
-    <div className="p-6">
-      <h3 className="text-2xl font-semibold mb-4">Your Sessions</h3>
-      <p>Coming soon...</p>
-    </div>
-  );
-  const PreviousDetailsTab = () => (
-    <div className="p-6">
-      <h3 className="text-2xl font-semibold mb-4">Previous Details</h3>
-      <p>Coming soon...</p>
-    </div>
-  );
-  const CreateSessionTab = () => (
-    <div className="p-6">
-      <h3 className="text-2xl font-semibold mb-4">Create Session with Mentor</h3>
-      <p>Coming soon...</p>
-    </div>
-  );
-
-  // Main content switcher
+  // Content based on active tab
   const renderContent = () => {
     switch (activeTab) {
       case "mentors":
-        return <MentorsTab />;
+        return <MentorDashboard />;
       case "sessions":
-        return <SessionsTab />;
-      case "previous":
-        return <PreviousDetailsTab />;
-      case "create-session":
-        return <CreateSessionTab />;
+        return (
+          <div className="p-6">
+            <h2 className="text-2xl font-bold">Sessions</h2>
+            <p>Sessions content coming soon...</p>
+          </div>
+        );
+      case "analysis":
+        return (
+          <div className="p-6">
+            <h2 className="text-2xl font-bold">Analysis</h2>
+            <p>Analysis content coming soon...</p>
+          </div>
+        );
       default:
-        return <MentorsTab />;
+        return null;
     }
   };
 
   return (
     <div className="flex min-h-screen">
-      <Sidebar />
-      <div className="flex-grow bg-white">{renderContent()}</div>
+      {/* Sidebar */}
+      <nav
+        className={`bg-gray-100 min-h-screen transition-all duration-300 ease-in-out overflow-hidden ${sidebarWidth}`}
+        onMouseEnter={() => setSidebarHovered(true)}
+        onMouseLeave={() => setSidebarHovered(false)}
+      >
+        <div className="flex flex-col items-center py-6 space-y-6">
+          {sidebarItems.map((item) => (
+            <button
+              key={item.id}
+              onClick={() => setActiveTab(item.id)}
+              className={`flex items-center w-full px-4 py-2 space-x-3 rounded
+                ${
+                  activeTab === item.id
+                    ? "bg-blue-600 text-white"
+                    : "text-gray-700 hover:bg-blue-200"
+                }`}
+            >
+              {/* Icon placeholders */}
+              <span className="text-lg font-bold">
+                {item.label.charAt(0)}
+              </span>
+              {/* Show label only if expanded */}
+              {sidebarHovered && <span>{item.label}</span>}
+            </button>
+          ))}
+        </div>
+      </nav>
+
+      {/* Main content */}
+      <main className="flex-grow bg-white">{renderContent()}</main>
     </div>
   );
 }

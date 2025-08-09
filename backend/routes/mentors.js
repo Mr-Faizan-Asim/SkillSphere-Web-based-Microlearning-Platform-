@@ -3,25 +3,19 @@ const router = express.Router();
 const { auth, requireRole } = require('../middlewares/auth');
 const mentorController = require('../controllers/mentorController');
 
-// Search mentors
-router.get('/', mentorController.search);
+// Get all mentors (with filters & pagination)
+router.get('/', mentorController.getAllMentors);
 
-// Apply or update mentor profile
-router.post('/apply', auth, requireRole('mentor'), async (req, res) => {
-  try {
-    const { subjects, tags, bio, portfolio } = req.body;
-    req.user.mentorProfile = {
-      subjects,
-      tags,
-      bio,
-      portfolio,
-      verified: false
-    };
-    await req.user.save();
-    res.json({ message: 'Mentor profile submitted for approval' });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
+// Get best rated mentors
+router.get('/best-rated', mentorController.getBestRatedMentors);
+
+// Get mentor by id
+router.get('/:id', mentorController.getMentorById);
+
+// Create or update mentor profile (mentor only)
+router.post('/apply', auth, requireRole('mentor'), mentorController.createOrUpdateMentorProfile);
+
+// Delete mentor profile (mentor only)
+router.delete('/delete', auth, requireRole('mentor'), mentorController.deleteMentorProfile);
 
 module.exports = router;
