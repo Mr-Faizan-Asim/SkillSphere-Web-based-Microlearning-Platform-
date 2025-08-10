@@ -13,7 +13,20 @@ const SessionSchema = new Schema({
   notes: String,
   resources: [{ title: String, url: String }],
   price: Number,
-  createdAt: { type: Date, default: Date.now }
+  createdAt: { type: Date, default: Date.now },
+  rating: { 
+    type: Number, 
+    min: 1, 
+    max: 5,
+    validate: {
+      validator: function(value) {
+        return this.status === 'completed' || !value;
+      },
+      message: 'Rating can only be set for completed sessions'
+    }
+  },
+  review: String,
+  isRated: { type: Boolean, default: false }
 });
 
 module.exports = mongoose.model('Session', SessionSchema);
