@@ -49,7 +49,7 @@ const AvatarPage = () => {
       const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
         method: 'POST',
         headers: { 
-          'Authorization': 'Bearer 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',
+          'Authorization': '',
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
