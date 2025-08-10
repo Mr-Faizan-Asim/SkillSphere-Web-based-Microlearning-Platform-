@@ -111,6 +111,7 @@ exports.getMentorSessions = async (req, res) => {
 exports.acceptSession = async (req, res) => {
   try {
     const sessionId = req.params.id;
+    const { meetingLink } = req.body; // <-- get meetingLink from frontend request
 
     const session = await Session.findById(sessionId);
     if (!session) {
@@ -123,6 +124,12 @@ exports.acceptSession = async (req, res) => {
     }
 
     session.status = 'confirmed';
+
+    // Save meeting link if provided
+    if (meetingLink) {
+      session.meetingLink = meetingLink;
+    }
+
     await session.save();
 
     res.json({ message: 'Session accepted', session });
@@ -131,6 +138,7 @@ exports.acceptSession = async (req, res) => {
     res.status(500).json({ error: 'Server error while accepting session' });
   }
 };
+
 
 // ======================
 // Decline session request (mentor)
