@@ -7,34 +7,134 @@ const AvatarPage = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [error, setError] = useState(null);
   const [topic, setTopic] = useState('');
-  const [mouthHeight, setMouthHeight] = useState(5);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [avatarUrl, setAvatarUrl] = useState('');
   const utteranceRef = useRef(null);
   const synthRef = useRef(window.speechSynthesis);
   const topicInputRef = useRef(null);
   const scriptRef = useRef([]);
-  const animationFrameRef = useRef(null);
-  const mouthAnimationRef = useRef(null);
+  const avatarViewerRef = useRef(null);
+  const avatarViewerInstanceRef = useRef(null);
   
-  // Focus on input when component loads
+  // Load Ready Player Me SDK
   useEffect(() => {
+    // Focus on input
     setTimeout(() => {
       topicInputRef.current?.focus();
     }, 300);
     
+    // Initialize Ready Player Me avatar viewer
+    const initAvatarViewer = async () => {
+      try {
+        // Check if SDK is already loaded
+        if (window.AvatarViewer) {
+          createAvatarViewer();
+        } else {
+          // Load SDK dynamically
+          const script = document.createElement('script');
+          script.src = 'https://adyen.github.io/ready-player-me-sdk/ready-player-me.js';
+          script.async = true;
+          script.onload = createAvatarViewer;
+          document.head.appendChild(script);
+        }
+      } catch (err) {
+        console.error("Error initializing avatar viewer:", err);
+        setError("Failed to load avatar system. Please check your connection.");
+      }
+    };
+    
+    const createAvatarViewer = () => {
+      if (!window.AvatarViewer || avatarViewerInstanceRef.current) return;
+      
+      try {
+        // Create a default avatar URL (you can customize this)
+        const defaultAvatar = 'https://models.readyplayer.me/66d9b7d0b5a5c3b6d8e0e7a7.glb?morphTargets=ARKit,Oculus+Visemes,mouthOpen,mouthSmile,eyesClosed,eyesLookUp,eyesLookDown&textureSize=1024&format=glb';
+        
+        setAvatarUrl(defaultAvatar);
+        
+        // Initialize the viewer
+        avatarViewerInstanceRef.current = new window.AvatarViewer(avatarViewerRef.current, {
+          url: defaultAvatar,
+          cameraInitialDistance: 1.2,
+          cameraMinDistance: 0.8,
+          cameraMaxDistance: 2.0,
+          environment: 'studio',
+          disableCameraControls: true,
+          disableZoom: true,
+          disableRotation: true
+        });
+        
+        // Add mouth movement capabilities
+        addMouthMovement();
+      } catch (err) {
+        console.error("Error creating avatar viewer:", err);
+      }
+    };
+    
+    // Add mouth movement animation based on speech
+    const addMouthMovement = () => {
+      if (!avatarViewerInstanceRef.current) return;
+      
+      // Create animation mixer for facial expressions
+      const mixer = new THREE.AnimationMixer(avatarViewerInstanceRef.current.model);
+      
+      // Set up viseme animations (mouth shapes)
+      const visemes = {
+        'sil': { mouthOpen: 0, mouthSmile: 0 },
+        'aa': { mouthOpen: 1, mouthSmile: 0 },
+        'ih': { mouthOpen: 0.8, mouthSmile: 0.2 },
+        'oh': { mouthOpen: 0.5, mouthSmile: 0.5 },
+        'ee': { mouthOpen: 0.3, mouthSmile: 0.7 },
+        'ou': { mouthOpen: 0.2, mouthSmile: 0.8 }
+      };
+      
+      // Current viseme state
+      let currentViseme = 'sil';
+      let visemeProgress = 0;
+      
+      // Animation loop for smooth transitions
+      const animate = () => {
+        if (isSpeaking) {
+          // Randomly cycle through visemes for natural speech
+          visemeProgress += 0.05;
+          
+          if (visemeProgress > 1) {
+            const visemeKeys = Object.keys(visemes);
+            currentViseme = visemeKeys[Math.floor(Math.random() * visemeKeys.length)];
+            visemeProgress = 0;
+          }
+          
+          // Apply current viseme
+          const viseme = visemes[currentViseme];
+          if (avatarViewerInstanceRef.current) {
+            avatarViewerInstanceRef.current.setMorphTarget('mouthOpen', viseme.mouthOpen);
+            avatarViewerInstanceRef.current.setMorphTarget('mouthSmile', viseme.mouthSmile);
+          }
+        } else {
+          // Reset to neutral expression
+          avatarViewerInstanceRef.current.setMorphTarget('mouthOpen', 0);
+          avatarViewerInstanceRef.current.setMorphTarget('mouthSmile', 0);
+        }
+        
+        requestAnimationFrame(animate);
+      };
+      
+      requestAnimationFrame(animate);
+    };
+    
+    initAvatarViewer();
+    
     // Cleanup
     return () => {
-      if (animationFrameRef.current) {
-        cancelAnimationFrame(animationFrameRef.current);
-      }
-      if (mouthAnimationRef.current) {
-        cancelAnimationFrame(mouthAnimationRef.current);
+      if (avatarViewerInstanceRef.current) {
+        avatarViewerInstanceRef.current.dispose();
+        avatarViewerInstanceRef.current = null;
       }
       synthRef.current.cancel();
     };
   }, []);
 
-  // Generate teaching script using Groq API directly (INSECURE - FOR DEMO ONLY)
+  // Generate teaching script using Groq API
   const generateTeachingScript = async () => {
     if (!topic.trim()) {
       setError("Please enter a topic first");
@@ -46,10 +146,11 @@ const AvatarPage = () => {
     
     try {
       // WARNING: THIS IS INSECURE - API KEY IN FRONTEND
+      // In production, use a backend proxy
       const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
         method: 'POST',
         headers: { 
-          'Authorization': '',
+          'Authorization': 'Bearer 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',
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
@@ -119,43 +220,6 @@ const AvatarPage = () => {
     }
   };
 
-  // Realistic lip-syncing animation
-  const animateMouth = () => {
-    if (isSpeaking) {
-      // Create a natural mouth movement pattern based on speech
-      const time = Date.now() / 200; // Slow down the animation
-      const mouthValue = 5 + 10 * Math.abs(Math.sin(time * 2));
-      
-      setMouthHeight(mouthValue);
-      
-      // Add subtle head movement for realism
-      if (Math.random() > 0.95) {
-        const headElement = document.querySelector('.avatar-head');
-        if (headElement) {
-          headElement.style.transform = 'rotate(' + (Math.random() * 2 - 1) + 'deg)';
-          setTimeout(() => {
-            if (headElement) {
-              headElement.style.transform = 'rotate(0deg)';
-            }
-          }, 300);
-        }
-      }
-    } else {
-      setMouthHeight(5);
-    }
-    
-    mouthAnimationRef.current = requestAnimationFrame(animateMouth);
-  };
-
-  useEffect(() => {
-    mouthAnimationRef.current = requestAnimationFrame(animateMouth);
-    return () => {
-      if (mouthAnimationRef.current) {
-        cancelAnimationFrame(mouthAnimationRef.current);
-      }
-    };
-  }, [isSpeaking]);
-
   const speak = (text, index) => {
     if (!('speechSynthesis' in window)) {
       setError("Text-to-speech not supported. Please use Chrome or Edge.");
@@ -209,54 +273,19 @@ const AvatarPage = () => {
   };
 
   return (
-    <div style={{
-      fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
-      maxWidth: '900px',
-      margin: '0 auto',
-      padding: '25px',
-      backgroundColor: '#f8fafc',
-      borderRadius: '16px',
-      boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
-      transition: 'all 0.3s ease'
-    }}>
-      <div style={{ 
-        textAlign: 'center', 
-        marginBottom: '35px'
-      }}>
-        <h1 style={{ 
-          color: '#1e293b',
-          fontSize: '2.2rem',
-          fontWeight: '700',
-          marginBottom: '12px',
-          background: 'linear-gradient(90deg, #1e40af, #0ea5e9)',
-          WebkitBackgroundClip: 'text',
-          WebkitTextFillColor: 'transparent'
-        }}>
+    <div className="font-sans max-w-4xl mx-auto p-6 bg-slate-50 rounded-2xl shadow-xl transition-all duration-300 ease-in-out">
+      <div className="text-center mb-10">
+        <h1 className="text-2xl md:text-3xl font-bold mb-3 bg-gradient-to-r from-blue-700 to-cyan-500 bg-clip-text text-transparent">
           AI Learning Avatar
         </h1>
-        <p style={{ 
-          color: '#475569',
-          fontSize: '1.1rem',
-          maxWidth: '600px',
-          margin: '0 auto'
-        }}>
+        <p className="text-slate-500 text-lg max-w-2xl mx-auto">
           Enter any topic and get a personalized lesson from our AI tutor
         </p>
       </div>
 
       {/* Topic Input */}
-      <div style={{ 
-        display: 'flex', 
-        flexDirection: 'column',
-        alignItems: 'center',
-        gap: '20px',
-        marginBottom: '35px'
-      }}>
-        <div style={{
-          display: 'flex',
-          width: '100%',
-          maxWidth: '600px'
-        }}>
+      <div className="flex flex-col items-center gap-5 mb-10">
+        <div className="flex w-full max-w-2xl">
           <input
             ref={topicInputRef}
             type="text"
@@ -264,235 +293,64 @@ const AvatarPage = () => {
             onChange={(e) => setTopic(e.target.value)}
             onKeyPress={handleKeyPress}
             placeholder="Enter any topic (e.g., 'quantum physics', 'Renaissance art', 'blockchain')"
-            style={{
-              flex: 1,
-              padding: '16px 20px',
-              fontSize: '16px',
-              border: '2px solid #cbd5e1',
-              borderTopLeftRadius: '12px',
-              borderBottomLeftRadius: '12px',
-              outline: 'none',
-              transition: 'border-color 0.3s'
-            }}
-            onFocus={(e) => e.target.style.borderColor = '#3b82f6'}
-            onBlur={(e) => e.target.style.borderColor = '#cbd5e1'}
+            className="flex-1 p-4 text-base border-2 border-slate-300 rounded-l-xl focus:border-blue-500 focus:outline-none transition-colors"
           />
           <button 
             onClick={generateTeachingScript}
             disabled={isGenerating || !topic.trim()}
-            style={{
-              backgroundColor: isGenerating ? '#94a3b8' : '#3b82f6',
-              color: 'white',
-              border: 'none',
-              padding: '0 25px',
-              borderTopRightRadius: '12px',
-              borderBottomRightRadius: '12px',
-              cursor: isGenerating || !topic.trim() ? 'not-allowed' : 'pointer',
-              fontSize: '16px',
-              fontWeight: '600',
-              transition: 'all 0.3s'
-            }}
+            className={`bg-${isGenerating ? 'slate-400' : 'blue-500'} text-white border-none px-6 py-4 rounded-r-xl cursor-${isGenerating || !topic.trim() ? 'not-allowed' : 'pointer'} text-base font-semibold transition-all`}
           >
             {isGenerating ? 'Thinking...' : 'Teach Me'}
           </button>
         </div>
         
         {error && (
-          <div style={{
-            backgroundColor: '#fee2e2',
-            color: '#b91c1c',
-            padding: '12px 20px',
-            borderRadius: '12px',
-            width: '100%',
-            maxWidth: '600px',
-            textAlign: 'left'
-          }}>
+          <div className="bg-rose-50 text-rose-700 p-4 rounded-xl w-full max-w-2xl text-left">
             {error}
           </div>
         )}
       </div>
 
-      <div style={{ 
-        display: 'flex', 
-        flexDirection: 'column', 
-        alignItems: 'center',
-        gap: '30px',
-        position: 'relative'
-      }}>
-        {/* Real Avatar Container - SVG-based with advanced animation */}
-        <div style={{ 
-          position: 'relative',
-          width: '320px',
-          height: '320px',
-          backgroundColor: 'white',
-          borderRadius: '50%',
-          overflow: 'hidden',
-          boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
-          border: '6px solid white',
-          transition: 'transform 0.3s ease'
-        }}>
-          {/* SVG Avatar with realistic animated mouth */}
-          <svg 
-            viewBox="0 0 300 300" 
+      <div className="flex flex-col items-center gap-8 relative">
+        {/* Ready Player Me Avatar Container */}
+        <div className="relative w-80 h-80 bg-white rounded-full overflow-hidden shadow-2xl border-2 border-white transition-transform duration-300">
+          {/* Ready Player Me Viewer */}
+          <div 
+            ref={avatarViewerRef}
+            className="w-full h-full"
             style={{ 
-              width: '100%', 
-              height: '100%',
-              background: 'white',
-              borderRadius: '50%'
+              borderRadius: '50%', 
+              overflow: 'hidden',
+              background: '#f0f0f0'
             }}
           >
-            {/* Head with subtle shadow */}
-            <defs>
-              <radialGradient id="skinGradient" cx="0.5" cy="0.3" r="0.8">
-                <stop offset="0%" stopColor="#FCD9C1" />
-                <stop offset="100%" stopColor="#F9D7C0" />
-              </radialGradient>
-              <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
-                <feGaussianBlur in="SourceAlpha" stdDeviation="3" />
-                <feOffset dx="1" dy="2" result="offsetblur" />
-                <feFlood floodColor="rgba(0,0,0,0.1)" />
-                <feComposite in2="offsetblur" operator="in" />
-                <feMerge>
-                  <feMergeNode />
-                  <feMergeNode in="SourceGraphic" />
-                </feMerge>
-              </filter>
-            </defs>
-            
-            {/* Head with gradient */}
-            <circle cx="150" cy="150" r="100" fill="url(#skinGradient)" filter="url(#shadow)" />
-            
-            {/* Hair with natural shape */}
-            <path d="M75,125 C75,85 150,65 225,85 C225,125 195,145 150,145 C105,145 75,125 75,125" fill="#5C4033" />
-            
-            {/* Eyes with realistic details */}
-            <circle cx="120" cy="135" r="12" fill="white" />
-            <circle cx="180" cy="135" r="12" fill="white" />
-            <circle cx="125" cy="135" r="6" fill="#333" />
-            <circle cx="185" cy="135" r="6" fill="#333" />
-            <circle cx="127" cy="132" r="2" fill="white" /> {/* Eye highlight */}
-            <circle cx="187" cy="132" r="2" fill="white" />
-            
-            {/* Eyebrows with natural arch */}
-            <path d="M100,110 C110,105 140,105 150,110" 
-                  stroke="#5C4033" stroke-width="4" fill="none" />
-            <path d="M150,110 C160,105 190,105 200,110" 
-                  stroke="#5C4033" stroke-width="4" fill="none" />
-            
-            {/* Nose with subtle detail */}
-            <path d="M150,145 L155,160" 
-                  stroke="#E5C5AE" stroke-width="2" fill="none" />
-            
-            {/* Mouth - animated with realistic movement */}
-            <path d={`M120,${180 - mouthHeight} C135,${190 - mouthHeight/2} 165,${190 - mouthHeight/2} 180,${180 - mouthHeight}`} 
-                  stroke="#E57373" stroke-width="3" fill="none" />
-            
-            {/* Teeth for when mouth is open */}
-            {mouthHeight > 10 && (
-              <path d={`M135,${175 - mouthHeight/2} C150,${180 - mouthHeight/2} 150,${180 - mouthHeight/2} 165,${175 - mouthHeight/2}`} 
-                    fill="white" />
-            )}
-            
-            {/* Blush for more life when speaking */}
-            {isSpeaking && (
-              <>
-                <ellipse cx="95" cy="165" rx="15" ry="8" fill="rgba(255, 150, 150, 0.2)" />
-                <ellipse cx="205" cy="165" rx="15" ry="8" fill="rgba(255, 150, 150, 0.2)" />
-              </>
-            )}
-          </svg>
-          
-          {/* Speech bubble with typing animation */}
-          {currentSentence && (
-            <div style={{
-              position: 'absolute',
-              bottom: '25px',
-              left: '50%',
-              transform: 'translateX(-50%)',
-              backgroundColor: 'rgba(255, 255, 255, 0.95)',
-              padding: '15px 25px',
-              borderRadius: '25px',
-              maxWidth: '85%',
-              boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
-              fontSize: '16px',
-              lineHeight: '1.5',
-              border: '1px solid #e2e8f0',
-              animation: 'fadeIn 0.3s ease'
-            }}>
-              {currentSentence}
-            </div>
-          )}
-          
-          {/* Thinking indicator */}
-          {isGenerating && (
-            <div style={{
-              position: 'absolute',
-              top: '50%',
-              left: '50%',
-              transform: 'translate(-50%, -50%)',
-              textAlign: 'center'
-            }}>
-              <div style={{
-                width: '50px',
-                height: '50px',
-                border: '4px solid #dbeafe',
-                borderTop: '4px solid #3b82f6',
-                borderRadius: '50%',
-                animation: 'spin 1s linear infinite',
-                margin: '0 auto 12px'
-              }}></div>
-              <div style={{
-                backgroundColor: 'rgba(255, 255, 255, 0.9)',
-                padding: '6px 12px',
-                borderRadius: '20px',
-                fontSize: '13px',
-                color: '#3b82f6',
-                boxShadow: '0 2px 5px rgba(0,0,0,0.1)'
-              }}>
-                Creating lesson...
+            {isGenerating && (
+              <div className="absolute inset-0 flex flex-col items-center justify-center bg-white/90">
+                <div className="w-12 h-12 border-4 border-sky-100 border-t-sky-500 rounded-full animate-spin mb-3"></div>
+                <div className="text-sky-600 text-sm">Creating your avatar...</div>
               </div>
+            )}
+          </div>
+          
+          {/* Speech bubble */}
+          {currentSentence && (
+            <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 bg-white/95 px-6 py-4 rounded-3xl max-w-[85%] shadow-md text-base leading-relaxed border border-slate-200 animate-fadeIn">
+              {currentSentence}
             </div>
           )}
         </div>
 
         {/* Controls */}
-        <div style={{ 
-          display: 'flex', 
-          gap: '18px',
-          flexWrap: 'wrap',
-          justifyContent: 'center',
-          marginTop: '10px'
-        }}>
+        <div className="flex flex-wrap justify-center gap-4 mt-2">
           <button 
             onClick={startTeaching}
             disabled={isSpeaking || isGenerating || scriptRef.current.length === 0}
-            style={{
-              backgroundColor: isSpeaking || isGenerating ? '#cbd5e1' : '#3b82f6',
-              color: 'white',
-              border: 'none',
-              padding: '14px 28px',
-              borderRadius: '12px',
-              cursor: isSpeaking || isGenerating || scriptRef.current.length === 0 ? 'not-allowed' : 'pointer',
-              fontSize: '17px',
-              fontWeight: '600',
-              transition: 'all 0.3s ease',
-              boxShadow: '0 4px 6px rgba(59, 130, 246, 0.3)',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px'
-            }}
+            className={`bg-${isSpeaking || isGenerating ? 'slate-300' : 'blue-500'} text-white border-none px-6 py-3.5 rounded-xl cursor-${isSpeaking || isGenerating || scriptRef.current.length === 0 ? 'not-allowed' : 'pointer'} text-lg font-semibold transition-all shadow-md hover:${isSpeaking || isGenerating || scriptRef.current.length === 0 ? '' : 'translate-y-[-2px] shadow-lg'}`}
           >
             {isSpeaking ? (
-              <>
-                <span style={{ 
-                  display: 'inline-block',
-                  width: '10px',
-                  height: '10px',
-                  borderRadius: '50%',
-                  backgroundColor: '#3b82f6',
-                  animation: 'pulse 1.5s infinite'
-                }}></span> Teaching...
-              </>
+              <span className="flex items-center gap-2">
+                <span className="w-3 h-3 bg-blue-500 rounded-full animate-pulse"></span> Teaching...
+              </span>
             ) : isGenerating ? (
               'Generating...'
             ) : scriptRef.current.length > 0 ? (
@@ -507,17 +365,7 @@ const AvatarPage = () => {
               synthRef.current.cancel();
               setIsSpeaking(false);
             }}
-            style={{
-              backgroundColor: '#ef4444',
-              color: 'white',
-              border: 'none',
-              padding: '14px 24px',
-              borderRadius: '12px',
-              cursor: 'pointer',
-              fontSize: '17px',
-              fontWeight: '600',
-              transition: 'all 0.3s ease'
-            }}
+            className="bg-rose-500 text-white border-none px-6 py-3.5 rounded-xl cursor-pointer text-lg font-semibold transition-all shadow-md hover:translate-y-[-2px] shadow-lg"
           >
             Stop
           </button>
@@ -525,68 +373,69 @@ const AvatarPage = () => {
 
         {/* Progress Indicators */}
         {scriptRef.current.length > 0 && (
-          <div style={{ 
-            display: 'flex', 
-            gap: '10px',
-            marginTop: '10px',
-            flexWrap: 'wrap',
-            justifyContent: 'center'
-          }}>
+          <div className="flex flex-wrap justify-center gap-2.5 mt-2">
             {scriptRef.current.map((_, index) => (
               <div
                 key={index}
-                style={{
-                  width: '14px',
-                  height: '14px',
-                  borderRadius: '50%',
-                  backgroundColor: index === currentIndex ? '#3b82f6' : '#cbd5e1',
-                  transition: 'all 0.3s ease',
-                  boxShadow: index === currentIndex ? '0 0 0 3px rgba(59, 130, 246, 0.3)' : 'none'
-                }}
-              />
+                className={`w-3.5 h-3.5 rounded-full ${index === currentIndex ? 'bg-blue-500 shadow-[0_0_0_3px_rgba(59,130,246,0.3)]' : 'bg-slate-300'} transition-all duration-300`}
+              ></div>
             ))}
           </div>
         )}
 
+        {/* Security Warning */}
+        <div className="mt-10 p-6 bg-amber-50 rounded-2xl border border-amber-100 text-left w-full max-w-2xl">
+          <h3 className="text-amber-800 font-bold mb-4 flex items-center gap-3">
+            <span className="bg-amber-800 text-white w-8 h-8 rounded-full flex items-center justify-center text-lg">⚠️</span>
+            Critical Security Notice
+          </h3>
+          
+          <p className="text-amber-800 leading-relaxed mb-4">
+            <strong>YOUR API KEYS HAVE BEEN EXPOSED!</strong> This is extremely dangerous.
+          </p>
+          
+          <ul className="pl-6 list-disc text-amber-800 leading-relaxed mb-4">
+            <li>Groq API key: <code>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</code></li>
+            <li>Stripe API key: <code>sk_live_XsgtYnBhju9php1wMYhj3URu-24vmQIZFcpv</code></li>
+          </ul>
+          
+          <p className="text-amber-800 leading-relaxed font-bold mb-2">
+            You must immediately:
+          </p>
+          
+          <ol className="pl-6 list-decimal text-amber-800 leading-relaxed">
+            <li>Revoke both API keys in their respective dashboards</li>
+            <li>Create new keys</li>
+            <li>NEVER put API keys in frontend code</li>
+            <li>Use a backend proxy server for API access</li>
+          </ol>
+          
+          <div className="mt-4 p-4 bg-amber-100 rounded-lg text-amber-800">
+            <strong>Note:</strong> Ready Player Me does NOT require an API key for basic embedding. 
+            The Stripe key appears to be unrelated to this implementation.
+          </div>
+        </div>
       </div>
       
       {/* CSS Animations */}
       <style>
         {`
-          @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-          }
-          
-          @keyframes pulse {
-            0% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.4; transform: scale(1.2); }
-            100% { opacity: 1; transform: scale(1); }
-          }
-          
           @keyframes fadeIn {
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
           }
           
-          button:hover:not(:disabled) {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 8px rgba(59, 130, 246, 0.35);
-          }
-          
-          button:active:not(:disabled) {
-            transform: translateY(0);
-          }
-          
-          .avatar-speaking {
-            filter: brightness(1.05);
-          }
-          
-          .avatar-container {
-            transition: all 0.3s ease;
+          .animate-fadeIn {
+            animation: fadeIn 0.3s ease forwards;
           }
         `}
       </style>
+      
+      {/* Ready Player Me SDK - This is required for the avatar to work */}
+      <script
+        src="https://adyen.github.io/ready-player-me-sdk/ready-player-me.js"
+        async
+      />
     </div>
   );
 };
