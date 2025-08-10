@@ -114,30 +114,46 @@ export default function SessionDashboard() {
         ) : (
           <div className="grid gap-5 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
             {sessions.map(s => (
-              <div
+            <div
                 key={s._id}
                 onClick={() => setSelectedSession(s)}
                 className="bg-white p-4 rounded-xl shadow hover:shadow-lg cursor-pointer transition"
-              >
+            >
                 <div className="flex justify-between mb-2">
-                  <h3 className="font-semibold">{s.learnerId?.name || s.learnerId?.email}</h3>
-                  <span
+                <h3 className="font-semibold">{s.learnerId?.name || s.learnerId?.email}</h3>
+                <span
                     className={`px-2 py-1 text-sm rounded-full ${
-                      isBefore(new Date(s.scheduledAt), new Date())
+                    isBefore(new Date(s.scheduledAt), new Date())
                         ? "bg-gray-200 text-gray-600"
                         : "bg-green-200 text-green-800"
                     }`}
-                  >
+                >
                     {isBefore(new Date(s.scheduledAt), new Date()) ? "Past" : "Upcoming"}
-                  </span>
+                </span>
                 </div>
                 <p className="text-gray-600">{formatDatePretty(s.scheduledAt)}</p>
                 <p className="text-gray-600">Duration: {s.durationMinutes} min</p>
                 <p className="capitalize">
-                  <strong>Status:</strong> {s.status}
+                <strong>Status:</strong> {s.status}
                 </p>
-              </div>
+
+                {/* Show meeting link if confirmed and link exists */}
+                {s.status === "confirmed" && s.meetingLink && (
+                <p className="mt-2">
+                    <a
+                    href={s.meetingLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-indigo-600 hover:underline font-semibold"
+                    onClick={e => e.stopPropagation()} // Prevent opening detail panel when clicking link
+                    >
+                    Join Meeting
+                    </a>
+                </p>
+                )}
+            </div>
             ))}
+
           </div>
         )}
 

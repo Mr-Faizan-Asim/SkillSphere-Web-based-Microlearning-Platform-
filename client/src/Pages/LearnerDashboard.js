@@ -1,11 +1,12 @@
 import React, { useState } from "react";
 import MentorDashboard from "./MentorDashboard";
 import SessionDashboard from "./SessionDashboard";
+import AvatarPage from "./AvatarPage";
 
 const sidebarItems = [
   { id: "mentors", label: "Mentors" },
   { id: "sessions", label: "Sessions" },
-  { id: "analysis", label: "Analysis" },
+  { id: "AI Teacher", label: "AI Teacher" },
 ];
 
 export default function LearnerDashboard() {
@@ -24,12 +25,9 @@ export default function LearnerDashboard() {
         return (
           <SessionDashboard/>
         );
-      case "analysis":
+      case "AI Teacher":
         return (
-          <div className="p-6">
-            <h2 className="text-2xl font-bold">Analysis</h2>
-            <p>Analysis content coming soon...</p>
-          </div>
+          <AvatarPage topic="Pointers" />
         );
       default:
         return null;
