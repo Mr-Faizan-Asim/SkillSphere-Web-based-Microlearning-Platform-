@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import MentorSessionRequests from "./MentorSessionRequests";
-
+import EditProfilePage from "./EditProfilePage";
+  
 
 const sidebarItems = [
   { id: "sessions", label: "Sessions" },
@@ -23,7 +24,7 @@ export default function TeacherDashboard() {
       case "ratings":
         return <>ABCS</>
       case "profile":
-        return <>ABCS</>
+        return <EditProfilePage/>
       default:
         return null;
     }

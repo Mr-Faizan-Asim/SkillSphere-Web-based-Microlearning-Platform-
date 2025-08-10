@@ -111,6 +111,7 @@ exports.getMentorSessions = async (req, res) => {
 exports.acceptSession = async (req, res) => {
   try {
     const sessionId = req.params.id;
+    const { meetingLink } = req.body; // <-- get meetingLink from frontend request
 
     const session = await Session.findById(sessionId);
     if (!session) {
@@ -123,6 +124,12 @@ exports.acceptSession = async (req, res) => {
     }
 
     session.status = 'confirmed';
+
+    // Save meeting link if provided
+    if (meetingLink) {
+      session.meetingLink = meetingLink;
+    }
+
     await session.save();
 
     res.json({ message: 'Session accepted', session });
@@ -131,6 +138,7 @@ exports.acceptSession = async (req, res) => {
     res.status(500).json({ error: 'Server error while accepting session' });
   }
 };
+
 
 // ======================
 // Decline session request (mentor)
@@ -156,5 +164,116 @@ exports.declineSession = async (req, res) => {
   } catch (error) {
     console.error('Error declining session:', error);
     res.status(500).json({ error: 'Server error while declining session' });
+  }
+};
+
+
+// Add this new controller
+exports.rateMentor = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { rating, review } = req.body;
+    const learnerId = req.user.id;
+
+    // Validate input
+    if (rating < 1 || rating > 5) {
+      return res.status(400).json({ error: 'Rating must be between 1 and 5' });
+    }
+
+    // Find session
+    const session = await Session.findById(id);
+    if (!session) {
+      return res.status(404).json({ error: 'Session not found' });
+    }
+
+    // Check if session belongs to learner
+    if (session.learnerId.toString() !== learnerId.toString()) {
+      return res.status(403).json({ error: 'Not authorized to rate this session' });
+    }
+
+    // Check if session is completed and not already rated
+    if (session.status !== 'completed' || session.isRated) {
+      return res.status(400).json({ 
+        error: 'Session must be completed and unrated to submit a rating' 
+      });
+    }
+
+    // Update session
+    session.rating = rating;
+    session.review = review;
+    session.isRated = true;
+    await session.save();
+
+    // Update mentor's rating
+    const mentor = await User.findById(session.mentorId);
+    if (!mentor) {
+      return res.status(404).json({ error: 'Mentor not found' });
+    }
+
+    // Calculate new average rating
+    const currentTotal = mentor.mentorProfile.rating * mentor.mentorProfile.ratingCount;
+    const newTotal = currentTotal + rating;
+    const newCount = mentor.mentorProfile.ratingCount + 1;
+    const newAvg = newTotal / newCount;
+
+    mentor.mentorProfile.rating = newAvg;
+    mentor.mentorProfile.ratingCount = newCount;
+    await mentor.save();
+
+    res.json({ 
+      message: 'Rating submitted successfully',
+      session,
+      mentorRating: newAvg 
+    });
+  } catch (error) {
+    console.error('Error rating mentor:', error);
+    res.status(500).json({ error: 'Server error while submitting rating' });
+  }
+};
+
+
+exports.markAsCompleted = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const learnerId = req.user.id;
+
+    // Find session
+    const session = await Session.findById(id);
+    if (!session) {
+      return res.status(404).json({ error: 'Session not found' });
+    }
+
+    // Check if session belongs to learner
+    if (session.learnerId.toString() !== learnerId.toString()) {
+      return res.status(403).json({ error: 'Not authorized to mark this session as completed' });
+    }
+
+    // Check if session is confirmed and in the past
+    if (session.status !== 'confirmed') {
+      return res.status(400).json({ 
+        error: 'Session must be confirmed to mark as completed' 
+      });
+    }
+    
+    // Check if session is in the past (occurred at least 5 minutes ago)
+    const sessionTime = new Date(session.scheduledAt);
+    const now = new Date();
+    if (sessionTime > now) {
+      return res.status(400).json({ 
+        error: 'Cannot mark future sessions as completed' 
+      });
+    }
+    
+    // Update session status
+    session.status = 'completed';
+    await session.save();
+
+    res.json({ 
+      message: 'Session marked as completed',
+      session
+    });
+  } catch (error) {
+    console.error('Error marking session as completed:', error);
+    res.status(500).json({ error: 'Server error while marking session as completed' });
   }
 };

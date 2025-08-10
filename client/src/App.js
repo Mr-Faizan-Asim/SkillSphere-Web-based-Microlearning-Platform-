@@ -11,10 +11,8 @@ import LearnerDashboard from "./Pages/LearnerDashboard";
 import FeaturesPage from "./Pages/FeaturesPage";
 import PricingPage from "./Pages/PricingPage";
 import TeacherDashboard from "./Pages/TeacherDashboard";
+import AdminDashboard from "./Pages/AdminDashboard";
 
-// Dummy dashboard components
-const AdminDashboard = () => <h1>Admin Dashboard</h1>;
-const MentorDashboard = () => <h1>Mentor Dashboard</h1>;
 
 function App() {
   return (
@@ -34,9 +32,7 @@ function App() {
             <Route
               path="/dashboard/admin"
               element={
-                <ProtectedRoute allowedRole="admin">
-                  <AdminDashboard />
-                </ProtectedRoute>
+                  <AdminDashboard/>
               }
             />
             <Route

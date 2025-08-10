@@ -19,4 +19,9 @@ router.get('/mentor/:mentorId', sessionController.getMentorSessions);
 router.patch('/:id/accept', sessionController.acceptSession);
 router.patch('/:id/decline', sessionController.declineSession);
 
+// Add this new route
+router.patch('/:id/rate', auth,  sessionController.rateMentor);
+router.patch('/:id/mark-completed', auth, sessionController.markAsCompleted);
+
+
 module.exports = router;

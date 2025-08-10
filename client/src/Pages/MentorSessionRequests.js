@@ -1,12 +1,36 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { FaCheck, FaTimes, FaVideo, FaComments, FaSpinner, FaInbox, FaExclamationCircle } from "react-icons/fa";
+import {
+  FaCheck,
+  FaTimes,
+  FaVideo,
+  FaComments,
+  FaSpinner,
+  FaInbox,
+  FaExclamationCircle,
+  FaExternalLinkAlt,
+} from "react-icons/fa";
 
 const filterButtons = [
   { id: "requested", label: "Requested" },
   { id: "confirmed", label: "Confirmed" },
   { id: "rejected", label: "Rejected" },
 ];
+
+// Helper: generate a fake Google Meet link like meet.google.com/abc-defg-hij
+function generateGoogleMeetLink() {
+  const randomPart = () =>
+    Math.random()
+      .toString(36)
+      .substring(2, 5) +
+    Math.random()
+      .toString(36)
+      .substring(2, 5);
+  return `https://meet.google.com/${randomPart().slice(0, 3)}-${randomPart().slice(
+    3,
+    7
+  )}-${randomPart().slice(7, 10)}`;
+}
 
 export default function MentorSessionRequests() {
   const [activeFilter, setActiveFilter] = useState("requested");
@@ -21,17 +45,16 @@ export default function MentorSessionRequests() {
     fetchSessions();
   }, [activeFilter, mentorId]);
 
+  // Fetch all sessions for this mentor, filter by activeFilter
   async function fetchSessions() {
     setLoading(true);
     setError("");
     try {
       const res = await axios.get(`http://localhost:4000/sessions/mentor/${mentorId}`);
+
       let data = [...(res.data.upcoming || []), ...(res.data.past || [])];
-
       data = data.filter((s) => s.status === activeFilter);
-
       data.sort((a, b) => new Date(a.scheduledAt) - new Date(b.scheduledAt));
-
       setSessions(data);
     } catch (err) {
       console.error(err);
@@ -40,9 +63,15 @@ export default function MentorSessionRequests() {
     setLoading(false);
   }
 
+  // Accept session & attach generated Google Meet link
   async function handleAccept(sessionId) {
     try {
-      await axios.patch(`http://localhost:4000/sessions/${sessionId}/accept`);
+      const meetingLink = generateGoogleMeetLink();
+
+      await axios.patch(`http://localhost:4000/sessions/${sessionId}/accept`, {
+        meetingLink,
+      });
+
       fetchSessions();
     } catch (err) {
       console.error(err);
@@ -50,6 +79,7 @@ export default function MentorSessionRequests() {
     }
   }
 
+  // Decline session
   async function handleDecline(sessionId) {
     try {
       await axios.patch(`http://localhost:4000/sessions/${sessionId}/decline`);
@@ -60,6 +90,7 @@ export default function MentorSessionRequests() {
     }
   }
 
+  // Status badge styles
   const getStatusBadge = (status) => {
     const base = "px-3 py-1 text-sm rounded-full font-semibold capitalize";
     switch (status) {
@@ -74,6 +105,7 @@ export default function MentorSessionRequests() {
     }
   };
 
+  // Channel icons for UI
   const getChannelIcon = (channel) => {
     if (channel === "video") return <FaVideo className="inline mr-1 text-blue-500" />;
     if (channel === "chat") return <FaComments className="inline mr-1 text-purple-500" />;
@@ -179,11 +211,28 @@ export default function MentorSessionRequests() {
                 <p>
                   <strong>Channel:</strong> {getChannelIcon(session.channel)} {session.channel}
                 </p>
+
                 {session.resources?.title && (
                   <p>
                     <strong>Resource:</strong> {session.resources.title}
                   </p>
                 )}
+
+                {/* Show meeting link if confirmed */}
+                {session.meetingLink && (
+                  <p>
+                    <strong>Meeting Link: </strong>
+                    <a
+                      href={session.meetingLink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-600 hover:underline inline-flex items-center gap-1"
+                    >
+                      Join Meeting <FaExternalLinkAlt />
+                    </a>
+                  </p>
+                )}
+
                 <p>
                   <span className={getStatusBadge(session.status)}>{session.status}</span>
                 </p>
