@@ -158,27 +158,6 @@
 4. View platform analytics and insights
 5. Monitor session statuses and user activity
 
-## 📷 Screenshots
-
-### 1. Home Page - Best Mentors
-![Best Mentors Page](https://i.imgur.com/placeholder-mentors.png)
-*Discover top-rated mentors with AI-powered suggestions*
-
-### 2. Session Dashboard
-![Session Dashboard](https://i.imgur.com/placeholder-sessions.png)
-*Manage your upcoming and past sessions*
-
-### 3. AI-Powered Mentor Recommendations
-![AI Recommendations](https://i.imgur.com/placeholder-ai.png)
-*Personalized mentor suggestions based on your learning goals*
-
-### 4. Admin Dashboard
-![Admin Dashboard](https://i.imgur.com/placeholder-admin.png)
-*Comprehensive platform management and analytics*
-
-### 5. Mentor Profile View
-![Mentor Profile](https://i.imgur.com/placeholder-profile.png)
-*Detailed mentor information with session booking options*
 
 ## 🔌 API Endpoints
 
@@ -215,55 +194,3 @@
 | GET | `/api/admin/mentor-applications` | Get pending mentor applications |
 | PATCH | `/api/admin/mentor-applications/:id/approve` | Approve a mentor application |
 | GET | `/api/admin/analytics` | Get platform analytics |
-
-## 🤝 Contributing
-
-Contributions are welcome! Here's how to get started:
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
-Please follow the [Code of Conduct](CODE_OF_CONDUCT.md) when contributing.
-
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-```
-MIT License
-
-Copyright (c) 2023 Mentorship Platform
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-```
-
-## 🙏 Acknowledgements
-
-- Thanks to the open-source community for providing excellent libraries
-- Groq API for AI-powered features
-- DiceBear for avatar generation
-- Recharts for beautiful data visualization
-- date-fns for date manipulation
-
----
-
-**Note**: This project was developed for educational purposes and as part of a hackathon. The actual implementation may vary based on specific requirements and constraints.
