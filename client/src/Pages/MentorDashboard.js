@@ -3,10 +3,11 @@ import axios from "axios";
 import { RadialBarChart, RadialBar, Legend, Tooltip, ResponsiveContainer } from "recharts";
 import SessionBookingForm from "./SessionBookingForm";
 import { FaSearch, FaStar } from "react-icons/fa";
+import BestMentorsPage from "./BestMentorsPage";
 
 const sidebarItems = [
   { id: "mentor-list", label: "Mentor List", icon: <FaStar /> },
-  { id: "best-rated", label: "Best Rated", icon: <FaStar /> },
+  { id: "AI-suggestions", label: "AI Suggestions", icon: <FaStar /> },
 ];
 
 const ratingOptions = [
@@ -325,8 +326,8 @@ export default function MentorDashboard() {
     switch (activeTab) {
       case "mentor-list":
         return <MentorListTab />;
-      case "best-rated":
-        return <BestRatedTab />;
+      case "AI-suggestions":
+        return <BestMentorsPage />;
       case "mentor-details":
         return <MentorDetailsTab />;
       case "session-form":
