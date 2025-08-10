@@ -1,13 +1,15 @@
-# Mentorship Platform 🧠
+# SkillSphere 🧠
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Node.js](https://img.shields.io/badge/Node.js-14%2B-brightgreen)](https://nodejs.org/)
-[![React](https://img.shields.io/badge/React-18%2B-61DAFB)](https://reactjs.org/)
-[![Build Status](https://img.shields.io/github/actions/workflow/status/your-username/mentorship-platform/main.yml?branch=main)](https://github.com/your-username/mentorship-platform/actions)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)  
+[![Node.js](https://img.shields.io/badge/Node.js-14%2B-brightgreen)](https://nodejs.org/)  
+[![React](https://img.shields.io/badge/React-18%2B-61DAFB)](https://reactjs.org/)  
+[![Build Status](https://img.shields.io/github/actions/workflow/status/your-username/skillsphere/main.yml?branch=main)](https://github.com/your-username/skillsphere/actions)
 
-A comprehensive mentorship platform connecting learners with expert mentors for personalized learning experiences.
+**SkillSphere** — an AI-powered mentorship platform connecting learners with expert mentors. Get personalized learning suggestions, interact with a personal avatar tutor, and manage sessions professionally with AI assistance.
 
-![Mentorship Platform Banner](https://i.imgur.com/placeholder-banner.png)
+![SkillSphere Banner](https://i.imgur.com/placeholder-banner.png)
+
+---
 
 ## Table of Contents
 
@@ -22,65 +24,74 @@ A comprehensive mentorship platform connecting learners with expert mentors for 
 - [License](#-license)
 - [Acknowledgements](#-acknowledgements)
 
+---
+
 ## ✨ Features
 
 ### For Learners
-- 🔍 Discover mentors based on skills, ratings, and expertise
-- 📅 Book sessions with preferred mentors
-- 💬 Join video/audio sessions directly from the platform
-- ⭐ Rate and review mentors after sessions
-- 📝 Access session notes and resources
-- 🤖 AI-powered mentor recommendations based on learning goals
+- 🔍 Discover mentors by skills, ratings, and availability  
+- 📅 Book sessions with preferred mentors  
+- 🤖 **AI-Powered Personal Suggestions** tailored to your goals and learning style  
+- 🧑‍🏫 **Personal Avatar Tutor** — an interactive avatar that helps with Q&A and practice  
+- 💬 Join video/audio sessions directly from the platform  
+- ⭐ Rate and review mentors after sessions  
+- 📝 Access session notes, resources and follow-up tasks  
+- 🎯 Track progress with AI insights & learning plans
 
 ### For Mentors
-- 📝 Create and manage mentor profiles
-- 🕒 Set availability for sessions
-- 📩 Receive and respond to session requests
-- 💰 Set hourly rates and payment details
-- 📊 View analytics on sessions and ratings
+- 📝 Create and manage mentor profiles (bio, subjects, portfolio)  
+- 🕒 Set availability and manage bookings  
+- 📩 Receive/respond to session requests and messages  
+- 💰 Set hourly rates and payment details  
+- 📊 View analytics on sessions, earnings and ratings  
+- 🤖 **AI-Assisted Scheduling & Session Management** for professional client handling
 
 ### For Admins
-- 👥 User management (learners and mentors)
-- 📊 Platform analytics and insights
-- ✅ Mentor application approval system
-- 📅 Session management and monitoring
+- 👥 User management (learners & mentors)  
+- 📊 Platform analytics and AI-driven insights  
+- ✅ Mentor application approval workflow  
+- 📅 Session monitoring and moderation tools  
 - 📈 Advanced reporting and metrics
+
+---
 
 ## ⚙️ Tech Stack
 
 ### Frontend
-- **Framework**: React 18
-- **UI Library**: Tailwind CSS with custom components
-- **State Management**: React Context API
-- **Charts**: Recharts
-- **Icons**: React Icons
+- **Framework**: React 18  
+- **Styling**: Tailwind CSS  
+- **State Management**: React Context API (or Redux if required)  
+- **Charts**: Recharts  
+- **Icons**: React Icons  
+- **Avatar Generation**: DiceBear or similar
 
 ### Backend
-- **Runtime**: Node.js 16+
-- **Framework**: Express.js
-- **Database**: MongoDB with Mongoose
-- **Authentication**: JWT (JSON Web Tokens)
-- **AI Integration**: Groq API for AI summaries and recommendations
+- **Runtime**: Node.js 16+  
+- **Framework**: Express.js  
+- **Database**: MongoDB + Mongoose  
+- **Authentication**: JWT (JSON Web Tokens)  
+- **AI Integration**: Groq API (or your chosen AI provider) for tutor & recommendations
 
-### Additional Tools
-- **Version Control**: Git
-- **Package Manager**: npm
-- **Environment Variables**: dotenv
+### Tools
+- Git & GitHub  
+- npm / pnpm / yarn  
+- dotenv for environment variables
+
+---
 
 ## 🛠 Installation
 
 ### Prerequisites
-- Node.js (v16 or higher)
-- MongoDB (local or cloud instance)
-- npm (v8 or higher)
+- Node.js v16+  
+- MongoDB (local or Atlas)  
+- npm v8+
 
-### Steps
-
-1. **Clone the repository**
+### Setup
+1. **Clone repository**
    ```bash
-   git clone https://github.com/your-username/mentorship-platform.git
-   cd mentorship-platform
-   ```
+   git clone https://github.com/your-username/skillsphere.git
+   cd skillsphere
+
 
 2. **Set up environment variables**
    Create a `.env` file in the root directory with the following variables:
