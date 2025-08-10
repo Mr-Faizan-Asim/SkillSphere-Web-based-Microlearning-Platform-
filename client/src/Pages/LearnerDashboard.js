@@ -7,6 +7,7 @@ const sidebarItems = [
   { id: "mentors", label: "Mentors" },
   { id: "sessions", label: "Sessions" },
   { id: "AI Teacher", label: "AI Teacher" },
+  { id: "talknode", label: "TalkNode", external: true, url: "https://talknode.netlify.app/" },
 ];
 
 export default function LearnerDashboard() {
@@ -29,6 +30,9 @@ export default function LearnerDashboard() {
         return (
           <AvatarPage topic="Pointers" />
         );
+      case "talkNode":
+        window.location.href = "https://talknode.netlify.app/";
+        return null;
       default:
         return null;
     }
