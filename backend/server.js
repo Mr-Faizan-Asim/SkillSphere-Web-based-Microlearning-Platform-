@@ -12,7 +12,7 @@ app.use(rateLimit({ windowMs: 60*1000, max: 100 }));
 
 // CORS setup
 app.use(cors({
-  origin: 'http://localhost:3000', // exact origin
+  origin: '*', // exact origin
   credentials: true               // allow cookies/auth headers
 }));
 
