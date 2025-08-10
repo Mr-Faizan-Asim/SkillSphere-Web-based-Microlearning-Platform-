@@ -102,7 +102,8 @@ export default function SessionDashboard() {
     try {
       setIsRating(true);
       setRatingError('');
-      
+      console.log('Submitting rating:', rating, review, selectedSession._id);
+
       const res = await axios.patch(
         `http://localhost:4000/sessions/${selectedSession._id}/rate`,
         { rating, review },
